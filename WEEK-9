@@ -1,0 +1,168 @@
+FLOYD MARSHALL
+int findTheCity(int n, int** edges, int edgesSize, int* edgesColSize, int distanceThreshold) {
+    int dist[n][n];
+
+    // Initialize the distance matrix
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            dist[i][j] = (i == j) ? 0 : INT_MAX / 2; // Use INT_MAX/2 to avoid overflow
+        }
+    }
+
+    // Fill the edges
+    for (int i = 0; i < edgesSize; i++) {
+        int u = edges[i][0];
+        int v = edges[i][1];
+        int w = edges[i][2];
+        dist[u][v] = w;
+        dist[v][u] = w;
+    }
+
+    // Floyd-Warshall algorithm to find all pairs shortest paths
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+
+    int minReachable = n;
+    int city = -1;
+
+    for (int i = 0; i < n; i++) {
+        int count = 0;
+        for (int j = 0; j < n; j++) {
+            if (i != j && dist[i][j] <= distanceThreshold) {
+                count++;
+            }
+        }
+
+        if (count <= minReachable) {
+            minReachable = count;
+            city = i; // Update to the larger index if counts are the same
+        }
+    }
+
+    return city;
+}
+Input: n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4
+Output: 3
+Explanation: The figure above describes the graph. 
+The neighboring cities at a distanceThreshold = 4 for each city are:
+City 0 -> [City 1, City 2] 
+City 1 -> [City 0, City 2, City 3] 
+City 2 -> [City 0, City 1, City 3] 
+City 3 -> [City 1, City 2] 
+Cities 0 and 3 have 2 neighboring cities at a distanceThreshold = 4, but we have to return city 3 since it has the greatest number.
+Input: n = 5, edges = [[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]], distanceThreshold = 2
+Output: 0
+  
+Explanation: The figure above describes the graph. 
+The neighboring cities at a distanceThreshold = 2 for each city are:
+City 0 -> [City 1] 
+City 1 -> [City 0, City 4] 
+City 2 -> [City 3, City 4] 
+City 3 -> [City 2, City 4]
+City 4 -> [City 1, City 2, City 3] 
+The city 0 has 1 neighboring city at a distanceThreshold = 2.
+
+FRACTIONAL KNAPSACK
+#include <stdio.h>
+
+void knapsack(int n, int p[], int w[], int W) {
+    int used[n];  // Array to track if an item has been added or partially added
+    for (int i = 0; i < n; ++i) {
+        used[i] = 0;
+    }
+
+    int cur_w = W;  // Current available weight in the bag
+    float tot_v = 0.0;  // Total value of items in the bag
+    int i, maxi;
+
+    // Loop to fill the knapsack
+    while (cur_w > 0) {
+        maxi = -1;
+
+        // Find the next best item (highest value-to-weight ratio)
+        for (i = 0; i < n; ++i) {
+            if ((used[i] == 0) &&
+                ((maxi == -1) || ((float)p[i] / w[i] > (float)p[maxi] / w[maxi]))) {
+                maxi = i;
+            }
+        }
+
+        used[maxi] = 1;  // Mark the item as used
+
+        // If the item can fit completely in the bag
+        if (w[maxi] <= cur_w) {
+            cur_w -= w[maxi];
+            tot_v += p[maxi];
+            printf("Added object %d (%d, %d) completely in the bag. Space left: %d.\n",k 
+                   maxi + 1, w[maxi], p[maxi], cur_w);
+        } else {
+            // If only a fraction of the item can fit in the bag
+            int taken = cur_w;
+            cur_w = 0;
+            tot_v += (float)taken / w[maxi] * p[maxi];
+            printf("Added %d%% (%d, %d) of object %d in the bag.\n",
+                   (int)((float)taken / w[maxi] * 100), w[maxi], p[maxi], maxi + 1);
+        }
+
+        // If the knapsack is full, stop the loop
+        if (cur_w == 0) {
+            break;
+        }
+    }
+
+    printf("Filled the bag with objects worth %.2f.\n", tot_v);
+}
+
+int main() {
+    int n, W;
+
+    // Input the number of objects
+    printf("Enter the number of objects: ");
+    scanf("%d", &n);
+
+    int p[n], w[n];
+
+    // Input the profits of the objects
+    printf("Enter the profits of the objects: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &p[i]);
+    }
+
+    // Input the weights of the objects
+    printf("Enter the weights of the objects: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &w[i]);
+    }
+
+    // Input the maximum weight capacity of the bag
+    printf("Enter the maximum weight of the bag: ");
+    scanf("%d", &W);
+
+    // Call knapsack function to solve the problem
+    knapsack(n, p, w, W);
+
+    return 0;
+}
+
+OUTPUT :
+Enter the number of objects: 7
+Enter the profits of the objects: 5 10 15 7 8 9 4
+Enter the weights of the objects: 1 3 5 4 1 3 2
+Enter the maximum weight of the bag: 15
+Added object 5 (1, 8) completely in the bag. Space left: 14.
+Added object 1 (1, 5) completely in the bag. Space left: 13.
+Added object 2 (3, 10) completely in the bag. Space left: 10.
+Added object 3 (5, 15) completely in the bag. Space left: 5.
+Added object 6 (3, 9) completely in the bag. Space left: 2.
+Added object 7 (2, 4) completely in the bag. Space left: 0.
+Filled the bag with objects worth 51.00.
+
+Process returned 0 (0x0)   execution time : 88.276 s
+Press any key to continue.
